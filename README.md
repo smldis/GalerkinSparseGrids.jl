@@ -10,20 +10,18 @@ This technique in particular allows for an efficient numerical solution of Einst
 
 The sparse grid methods of this package can be extended beyond numerical relativity to many areas in high-dimensional data science and dynamics.
 
+
 ## Installing
 
-Prerequisites for using this package are:
-
-	Julia-0.5 (Latest Release)
-	ODE.jl	(For running the timesteps to solve the sparse dynamical evolution)
-	Cubature.jl (working to remove this prerequisite)
-
-They can be pulled from <https://github.com/JuliaLang/ODE.jl> and <https://github.com/stevengj/Cubature.jl>, respectively.
-
-Within Julia, use the package manager to write
-`Pkg.add("GalerkinSparseGrids")` to locally install this package. 
+Install this registered package by typing `Pkg.add("GalerkinSparseGrids")` in a Julia REPL.
 
 The latest version is available to be pulled from <https://github.com/ABAtanasov/GalerkinSparseGrids.jl>. You can access it by running `git pull https://github.com/ABAtanasov/GalerkinSparseGrids.jl master` from the appropriate package directory.
+
+
+## Requirements
+
+- DifferentialEquations.jl low dependency configuration (<http://docs.juliadiffeq.org/latest/features/low_dep.html>) for running the timesteps to solve the sparse dynamical evolution)
+- Cubature.jl (working to remove this prerequisite)
 
 ## Functionality
 
@@ -71,15 +69,15 @@ All solvers can be found in the `PDEs.jl` script. The simplest one solves the wa
 	wave_evolve_1D(k::Int, n::Int, 
 				   f0::Function, v0::Function, 
 				   time0::Real, time1::Real; 
-				   base = "hier", order = "45"). 
+				   base = "hier", alg = Tsit5()). 
 	
-Here, `k` and `n` are as before, `f0` is the initial condition for position, `v0` is the initial condition for velocity, `time0` and `time1` are the initial and final times of evolution. For 1D, we can also use the `"pos"` position basis (rather than the multi-resolution), and order `"78"` ode solvers. In either case, `ode45/ode78` from `ODE.jl` are respectively used to solve the differential equation.
+Here, `k` and `n` are as before, `f0` is the initial condition for position, `v0` is the initial condition for velocity, `time0` and `time1` are the initial and final times of evolution. For 1D, we can also use the `"pos"` position basis (rather than the multi-resolution), and Tsit5 OrdinaryDiffEq.jl default ODE algorithm (see http://docs.juliadiffeq.org/stable/ for alternatives).
     
-For example, for a standing wave solution from `t_0` to `t_1` seconds with k polynomials on each division, up to hierarchical level n, using `ode78`:
+For example, for a standing wave solution from `t_0` to `t_1` seconds with k polynomials on each division, up to hierarchical level n, using `Vern7()`:
 
 	f0 = x->sin(2*pi*x[1])
 	v0 = x->0
-    hier_soln = wave_evolve_1D(k, n, f0, v0, t_0, t_1; order="78")
+    hier_soln = wave_evolve_1D(k, n, f0, v0, t_0, t_1; alg=Vern7())
 
 For higher dimensions, we use 
 
@@ -88,11 +86,11 @@ For higher dimensions, we use
 				time0::Real, time1::Real; 
 				order = "45", scheme="sparse").
 
-For example, to solve a standing wave in 2-D from `t_0` to `t_1` with polynomials of degree less than `k` on each division, sparse depth `n`, and using `ode78`:
+For example, to solve a standing wave in 2-D from `t_0` to `t_1` with polynomials of degree less than `k` on each division, sparse depth `n`, and using `Vern7()`:
 
 	f0 = x->sin(2*pi*x[1])*sin(2*pi*x[2])
 	v0 = 0
-	sparse_soln = wave_evolve(2, k, n, f0, v0, t_0, t_1; order="78")
+	sparse_soln = wave_evolve(2, k, n, f0, v0, t_0, t_1; alg=Vern7())
 
 At `n = 1`, this is the same as `wave_evolve_1D` in the `"hier"` basis.  
 
